@@ -1,6 +1,7 @@
--- ZenOps: rls.sql
--- Apply after tables and helper functions are created.
+-- ZenOps: 011_rls_policies.sql
+-- Comprehensive Row-Level Security policies for all tables
 
+-- Enable RLS on all tables
 alter table public.organizations enable row level security;
 alter table public.teams enable row level security;
 alter table public.profiles enable row level security;
@@ -82,12 +83,20 @@ create policy org_crud_appointments on public.appointments for all using (organi
 
 -- Sales & Opportunities policies
 create policy org_crud_pipelines on public.pipelines for all using (organization_id = public.current_user_organization_id()) with check (organization_id = public.current_user_organization_id());
-create policy org_crud_pipeline_stages on public.pipeline_stages for all using (organization_id = public.current_user_organization_id()) with check (organization_id = public.current_user_organization_id());
+create policy org_crud_pipeline_stages on public.pipeline_stages for all using (
+  exists (select 1 from public.pipelines p where p.id = public.pipeline_stages.pipeline_id and p.organization_id = public.current_user_organization_id())
+) with check (
+  exists (select 1 from public.pipelines p where p.id = public.pipeline_stages.pipeline_id and p.organization_id = public.current_user_organization_id())
+);
 create policy org_select_opportunities on public.opportunities for select using (organization_id = public.current_user_organization_id() and (owner_user_id = auth.uid() or public.is_org_owner() or public.has_permission('view_all_opportunities')));
 create policy org_crud_opportunities on public.opportunities for all using (organization_id = public.current_user_organization_id()) with check (organization_id = public.current_user_organization_id());
 create policy org_select_proposals on public.proposals for select using (organization_id = public.current_user_organization_id() and (owner_user_id = auth.uid() or public.is_org_owner() or public.has_permission('view_all_proposals')));
 create policy org_crud_proposals on public.proposals for all using (organization_id = public.current_user_organization_id()) with check (organization_id = public.current_user_organization_id());
-create policy org_crud_proposal_items on public.proposal_items for all using (organization_id = public.current_user_organization_id()) with check (organization_id = public.current_user_organization_id());
+create policy org_crud_proposal_items on public.proposal_items for all using (
+  exists (select 1 from public.proposals p where p.id = public.proposal_items.proposal_id and p.organization_id = public.current_user_organization_id())
+) with check (
+  exists (select 1 from public.proposals p where p.id = public.proposal_items.proposal_id and p.organization_id = public.current_user_organization_id())
+);
 
 -- Automation policies
 create policy org_crud_automation_rules on public.automation_rules for all using (organization_id = public.current_user_organization_id()) with check (organization_id = public.current_user_organization_id());
@@ -106,5 +115,3 @@ create policy org_crud_referrals on public.referrals for all using (organization
 create policy org_crud_integration_credentials on public.integration_credentials for all using (organization_id = public.current_user_organization_id() and (public.is_org_owner() or public.has_permission('manage_integrations'))) with check (organization_id = public.current_user_organization_id());
 create policy org_crud_custom_field_definitions on public.custom_field_definitions for all using (organization_id = public.current_user_organization_id() and (public.is_org_owner() or public.has_permission('manage_custom_fields'))) with check (organization_id = public.current_user_organization_id());
 create policy org_crud_custom_field_values on public.custom_field_values for all using (organization_id = public.current_user_organization_id()) with check (organization_id = public.current_user_organization_id());
-
--- Service Role (for functions) can bypass RLS: all operations granting full access for automation
