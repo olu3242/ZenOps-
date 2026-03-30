@@ -1,0 +1,233 @@
+{
+  "info": {
+    "name": "ZenOps API Testing",
+    "description": "Postman collection for testing ZenOps backend APIs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Sign In",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"sales@zenops.demo\",\"password\":\"Test123!\"}"
+            },
+            "url": {
+              "raw": "{{SUPABASE_URL}}/auth/v1/token?grant_type=password",
+              "protocol": "https",
+              "host": ["{{SUPABASE_URL}}"],
+              "path": ["auth", "v1", "token"],
+              "query": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Database Queries (RLS)",
+      "item": [
+        {
+          "name": "Get Leads (as Sales Rep)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ACCESS_TOKEN}}"
+              },
+              {
+                "key": "apikey",
+                "value": "{{ANON_KEY}}"
+              }
+            ],
+            "url": {
+              "raw": "{{SUPABASE_URL}}/rest/v1/leads?organization_id=eq.550e8400-e29b-41d4-a716-446655440000",
+              "protocol": "https",
+              "host": ["{{SUPABASE_URL}}"],
+              "path": ["rest", "v1", "leads"],
+              "query": [
+                {
+                  "key": "organization_id",
+                  "value": "eq.550e8400-e29b-41d4-a716-446655440000"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Contacts (RLS filtered)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ACCESS_TOKEN}}"
+              },
+              {
+                "key": "apikey",
+                "value": "{{ANON_KEY}}"
+              }
+            ],
+            "url": {
+              "raw": "{{SUPABASE_URL}}/rest/v1/contacts",
+              "protocol": "https",
+              "host": ["{{SUPABASE_URL}}"],
+              "path": ["rest", "v1", "contacts"]
+            }
+          }
+        },
+        {
+          "name": "Get Opportunities",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ACCESS_TOKEN}}"
+              },
+              {
+                "key": "apikey",
+                "value": "{{ANON_KEY}}"
+              }
+            ],
+            "url": {
+              "raw": "{{SUPABASE_URL}}/rest/v1/opportunities",
+              "protocol": "https",
+              "host": ["{{SUPABASE_URL}}"],
+              "path": ["rest", "v1", "opportunities"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Edge Functions",
+      "item": [
+        {
+          "name": "Lead Intake Webhook",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-organization-id",
+                "value": "550e8400-e29b-41d4-a716-446655440000"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Test Lead\",\"email\":\"testlead@example.com\",\"phone\":\"+1-800-555-9999\",\"message\":\"Interested in demo\",\"source\":\"website_form\"}"
+            },
+            "url": {
+              "raw": "{{SUPABASE_URL}}/functions/v1/lead-intake",
+              "protocol": "https",
+              "host": ["{{SUPABASE_URL}}"],
+              "path": ["functions", "v1", "lead-intake"]
+            }
+          }
+        },
+        {
+          "name": "Appointment Reminders (Cron job simulation)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{SUPABASE_URL}}/functions/v1/appointment-reminders",
+              "protocol": "https",
+              "host": ["{{SUPABASE_URL}}"],
+              "path": ["functions", "v1", "appointment-reminders"]
+            }
+          }
+        },
+        {
+          "name": "First Response SLA Check",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"organization_id\":\"550e8400-e29b-41d4-a716-446655440000\"}"
+            },
+            "url": {
+              "raw": "{{SUPABASE_URL}}/functions/v1/first-response-sla",
+              "protocol": "https",
+              "host": ["{{SUPABASE_URL}}"],
+              "path": ["functions", "v1", "first-response-sla"]
+            }
+          }
+        },
+        {
+          "name": "Missed Call Handler",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"organization_id\":\"550e8400-e29b-41d4-a716-446655440000\",\"contact_id\":\"550e8400-e29b-41d4-a716-446655440200\",\"provider_user_id\":\"550e8400-e29b-41d4-a716-446655440001\",\"ring_time_seconds\":30}"
+            },
+            "url": {
+              "raw": "{{SUPABASE_URL}}/functions/v1/missed-call-handler",
+              "protocol": "https",
+              "host": ["{{SUPABASE_URL}}"],
+              "path": ["functions", "v1", "missed-call-handler"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "SUPABASE_URL",
+      "value": "https://utxmazyyufvupeygmhpw.supabase.co",
+      "type": "string"
+    },
+    {
+      "key": "ANON_KEY",
+      "value": "YOUR_ANON_KEY_HERE",
+      "type": "string"
+    },
+    {
+      "key": "ACCESS_TOKEN",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
