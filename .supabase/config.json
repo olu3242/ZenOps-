@@ -1,0 +1,4 @@
+{
+  "projectId": "utxmazyyufvupeygmhpw",
+  "dbUrl": "postgresql://postgres:@localhost:5432/postgres"
+}
